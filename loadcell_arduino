@@ -1,0 +1,39 @@
+#include "HX711.h"
+
+#define DT 3
+#define SCK 2
+
+HX711 scale;
+
+float calibration_factor = 140;
+
+float prevWeight = 0;   // previous displayed weight
+float threshold = 10;   // 10 gram change condition
+
+void setup() {
+  Serial.begin(9600);
+  scale.begin(DT, SCK);
+  scale.set_scale(calibration_factor);
+  scale.tare();
+}
+
+void loop() {
+
+  float weight = scale.get_units(30); 
+   // average 30 readings
+
+  if(weight < 0)
+    weight = 0;
+
+  // show weight only if difference >= 10 grams
+  if(abs(weight - prevWeight) >= threshold) {
+
+    Serial.print("Weight: ");
+    Serial.print(weight);
+    Serial.println(" g");
+
+    prevWeight = weight;
+  }
+
+  delay(200);
+}
