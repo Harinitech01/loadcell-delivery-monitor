@@ -1,0 +1,63 @@
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+
+const char* ssid = "Harini";
+const char* password = "harini01";
+
+#define BOTtoken "8547080117:AAE8DHVcfs83mMzOgE9oRchumHafxYlbDNU"
+#define CHAT_ID "1608663553"
+
+WiFiClientSecure client;
+UniversalTelegramBot bot(BOTtoken, client);
+
+float weight = 0;
+float prevWeight = 0;
+int count = 0;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+  }
+
+  client.setInsecure();
+
+  bot.sendMessage(CHAT_ID, "WiFi Connected. System Started.", "");
+}
+
+void loop() {
+
+  if (Serial.available()) {
+
+    weight = Serial.parseFloat();
+
+    if(weight > 0) {
+
+      count++;
+
+      String status = "";
+
+      if(weight > prevWeight)
+        status = "Weight Increased";
+      else if(weight < prevWeight)
+        status = "Weight Reduced";
+      else
+        status = "Weight Same";
+
+      String message =
+      "Weight: " + String(weight) + " g\n" +
+      "Status: " + status + "\n" +
+      "Count: " + String(count);
+
+      bot.sendMessage(CHAT_ID, message, "");
+
+      prevWeight = weight;
+    }
+  }
+
+}
